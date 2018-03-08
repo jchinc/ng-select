@@ -1,0 +1,54 @@
+{
+    "name": "ng-select",
+    "version": "1.0.0",
+    "description": "Control HTML SELECT ampliado con características de búsqueda, etc...",
+    "main": "./bundles/ng-select.umd.js",
+    "module": "./esm5/ng-select.js",
+    "es2015": "./esm2015/ng-select.js",
+    "typings": "./ng-select.d.ts",
+    "scripts": {
+        "build": "npm run clean && npm run build:inline && npm run build:esm2015 && npm run build:fesm2015 && npm run build:esm5 && npm run build:fesm5 && npm run build:umd && npm run build:min && npm run move:assets",
+        "clean": "rm -rf ./dist && rm -rf ./tmp",
+        "build:inline": "mkdir tmp && cp -r *.ts ./tmp && node inlineAssets.js",
+        "build:esm2015": "ngc -p tsconfig-esm2015.json",
+        "build:fesm2015": "rollup -c rollup-esm2015.conf.js",
+        "build:esm5": "ngc -p tsconfig-esm5.json",
+        "build:fesm5": "rollup -c rollup-esm5.conf.js",
+        "build:umd": "rollup -c rollup-umd.conf.js",
+        "build:min": "uglifyjs ./dist/bundles/ng-select.umd.js -c -m -o ./dist/bundles/ng-select.umd.min.js",
+        "move:assets": "cp -r ./tmp/esm2015/*.d.ts ./tmp/esm2015/src ./tmp/esm2015/*.json ./package.json README.md ./dist && rm -rf ./tmp"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jchinc/ng-component-seed.git"
+    },
+    "keywords": [
+        "Angular",
+        "Ng",
+        "HTML Select"
+    ],
+    "author": "José Chin",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/jchinc/ng-component-seed/issues"
+    },
+    "homepage": "https://github.com/jchinc/ng-component-seed#readme",
+    "peerDependencies": {
+        "@angular/core": ">=4.00 <=5.2.5"
+    },
+    "devDependencies": {
+        "@angular/compiler": "^5.2.5",
+        "@angular/compiler-cli": "^5.2.5",
+        "gulp": "^3.9.1",
+        "gulp-inline-ng2-template": "^4.1.0",
+        "rollup": "^0.55.5",
+        "typescript": "^2.6.2",
+        "uglify-js": "^3.3.10",
+        "vinyl-fs": "^3.0.2"
+    },
+    "dependencies": {
+        "@angular/core": "^5.2.5",
+        "rxjs": "^5.5.6",
+        "zone.js": "^0.8.20"
+    }
+}

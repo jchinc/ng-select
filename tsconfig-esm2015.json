@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "module": "es2015",
+        "moduleResolution": "node",
+        "target": "es2015",
+        "outDir": "./tmp/esm2015",
+        "rootDir": "./tmp",
+        "lib": [
+            "es2015",
+            "dom"
+        ],
+        "experimentalDecorators": true
+    },
+    "files": [
+        "./tmp/public_api.ts"
+    ],
+    "angularCompilerOptions": {
+        "strictMetadataEmit": true,
+        "skipTemplateCodegen": true,
+        "flatModuleOutFile":"ng-select.js",
+        "flatModuleId":"ng-select"
+    }
+}

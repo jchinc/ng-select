@@ -27,6 +27,7 @@
 
 .ng-select__dropdown-container {
     position: relative;
+    width: 100%;
 }
 
 .ng-select__dropdown--raised {

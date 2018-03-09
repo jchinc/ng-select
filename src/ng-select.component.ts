@@ -41,6 +41,8 @@ export class NgSelectComponent implements OnInit {
 
     @Input() clearAfterSelect = true;
 
+    @Input() isMultiselect = false;
+
     @Output() selectedItem = new EventEmitter<INgSelectItem>();
 
     @Output() inputFocused = new EventEmitter<any>();
@@ -60,7 +62,7 @@ export class NgSelectComponent implements OnInit {
     hoveredItem: INgSelectItem;
 
     private _hoveredItemIndex: number = -1;
-    
+
 
     private set _term(value: string) {
         this.selectForm.get('term').setValue(value);
@@ -86,6 +88,9 @@ export class NgSelectComponent implements OnInit {
     }
 
     inputBlur() {
+        if(this.isMultiselect){
+            return;
+        }
         this.dropdownVisible = false;
         this.inputBlurred.emit();
     }
@@ -204,6 +209,12 @@ export class NgSelectComponent implements OnInit {
      * @param event Evento del mouse.
      */
     itemMouseup(event: any) {
+
+        console.log(this.isMultiselect);
+        
+        if (this.isMultiselect) {
+            return;
+        }
 
         // Se oculta la lista después de levantar el click para evitar que al desaparecer la lista el click afecte a otro elemento.
         this.dropdownVisible = false;

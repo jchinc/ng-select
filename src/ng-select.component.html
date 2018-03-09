@@ -13,22 +13,26 @@
                    (keyup)="inputKeyup($event)"
                    (click)="inputClick($event)" />
         </div>
-    </form>
 
-    <!-- Elementos -->
-    <div *ngIf="dropdownVisible"
-         class="ng-select__dropdown-container">
-        <ul #select
-            class="ng-select__dropdown ng-select__dropdown--raised">
-            <li *ngIf="filteredItems.length===0"
-                class="ng-select__dropdown-item"
-                [style.height]="listItemHeight+'px'">
-                {{noRowsText}}
-            </li>
-            <li *ngFor="let item of filteredItems"
-                class="ng-select__dropdown-item">
-                {{item.value}}
-            </li>
-        </ul>
-    </div>
+
+        <!-- Elementos -->
+        <div 
+             class="ng-select__dropdown-container">
+            <ul #select
+                class="ng-select__dropdown ng-select__dropdown--raised">
+                <li *ngIf="filteredItems.length===0"
+                    class="ng-select__dropdown-item"
+                    [style.height]="listItemHeight+'px'">
+                    {{noRowsText}}
+                </li>
+                <li *ngFor="let item of filteredItems"
+                    class="ng-select__dropdown-item"
+                    (mousedown)="selectItem(item, $event)"
+                    (mouseup)="itemMouseup($event)">
+                    <input type="checkbox"> {{item.value}}
+                </li>
+            </ul>
+        </div>
+
+    </form>
 </div>

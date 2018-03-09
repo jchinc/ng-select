@@ -1,0 +1,30 @@
+{
+    "name": "@jchinc/ng-select",
+    "version": "1.0.13",
+    "description": "Control HTML SELECT ampliado con características de búsqueda, etc...",
+    "main": "./bundles/ng-select.umd.js",
+    "module": "./esm5/ng-select.js",
+    "es2015": "./esm2015/ng-select.js",
+    "typings": "./ng-select.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jchinc/ng-select.git"
+    },
+    "keywords": [
+        "Angular",
+        "Ng",
+        "HTML Select"
+    ],
+    "author": "José Chin",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/jchinc/ng-select/issues"
+    },
+    "homepage": "https://github.com/jchinc/ng-select#readme",
+    "peerDependencies": {
+        "@angular/core": ">=2.x <=5.x",
+        "@angular/common": ">=2.x <=5.x",
+        "@angular/platform-browser": ">=2.x <=5.x",
+        "@angular/forms": ">=2.x <=5.x"
+    }
+}

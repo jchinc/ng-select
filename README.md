@@ -1,5 +1,5 @@
-# ng-component-seed
-Plantilla para crear y publicar un componente Angular 2+
+# ng-select
+Control HTML SELECT ampliado con características de búsqueda, etc...
 
 ## tsconfig.json
 Archivo para configuración typescript durante el desarrollo. Intellisense, etc...

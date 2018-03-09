@@ -1,8 +1,34 @@
 <div class="ng-select__container">
-    <input type="text" class="ng-select__input" />
-    <ul class="ng-select__items">
-        <li *ngFor="let item of items" class="ng-select__item">
-            {{item.value}}
-        </li>
-    </ul>
+
+    <!-- Campo de entrada -->
+    <form [formGroup]="selectForm">
+        <div class="ng-select__input-container">
+            <input #input
+                   type="text"
+                   class="ng-select__input"
+                   formControlName="term"
+                   (focus)="inputFocus($event)"
+                   (blur)="inputBlur()"
+                   (keydown)="inputKeydown($event)"
+                   (keyup)="inputKeyup($event)"
+                   (click)="inputClick($event)" />
+        </div>
+    </form>
+
+    <!-- Elementos -->
+    <div *ngIf="dropdownVisible"
+         class="ng-select__dropdown-container">
+        <ul #select
+            class="ng-select__dropdown ng-select__dropdown--raised">
+            <li *ngIf="filteredItems.length===0"
+                class="ng-select__dropdown-item"
+                [style.height]="listItemHeight+'px'">
+                {{noRowsText}}
+            </li>
+            <li *ngFor="let item of filteredItems"
+                class="ng-select__dropdown-item">
+                {{item.value}}
+            </li>
+        </ul>
+    </div>
 </div>

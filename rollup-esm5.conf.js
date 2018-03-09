@@ -5,6 +5,8 @@ export default {
         format: 'es'
     },
     external: [
-        '@angular/core'
+        '@angular/core',
+        '@angular/common',
+        '@angular/forms'
     ]
 }

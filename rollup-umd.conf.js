@@ -5,10 +5,14 @@ export default {
         file: './dist/bundles/ng-select.umd.js',
         format: 'umd',
         globals: {
-            '@angular/core': 'ng.core'
+            '@angular/core': 'ng.core',
+            '@angular/common': 'ng.common',
+            '@angular/forms': 'ng.forms'
         }
     },
     external: [
-        '@angular/core'
+        '@angular/core',
+        '@angular/common',
+        '@angular/forms'
     ]
 }

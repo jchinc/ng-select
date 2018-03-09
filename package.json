@@ -1,11 +1,7 @@
 {
-    "name": "ng-select",
-    "version": "1.0.0",
+    "name": "@jchinc/ng-select",
+    "version": "1.0.13",
     "description": "Control HTML SELECT ampliado con características de búsqueda, etc...",
-    "main": "./bundles/ng-select.umd.js",
-    "module": "./esm5/ng-select.js",
-    "es2015": "./esm2015/ng-select.js",
-    "typings": "./ng-select.d.ts",
     "scripts": {
         "build": "npm run clean && npm run build:inline && npm run build:esm2015 && npm run build:fesm2015 && npm run build:esm5 && npm run build:fesm5 && npm run build:umd && npm run build:min && npm run move:assets",
         "clean": "rm -rf ./dist && rm -rf ./tmp",
@@ -16,11 +12,11 @@
         "build:fesm5": "rollup -c rollup-esm5.conf.js",
         "build:umd": "rollup -c rollup-umd.conf.js",
         "build:min": "uglifyjs ./dist/bundles/ng-select.umd.js -c -m -o ./dist/bundles/ng-select.umd.min.js",
-        "move:assets": "cp -r ./tmp/esm2015/*.d.ts ./tmp/esm2015/src ./tmp/esm2015/*.json ./package.json README.md ./dist && rm -rf ./tmp"
+        "move:assets": "cp -r ./tmp/esm2015/*.d.ts ./tmp/esm2015/src ./tmp/esm2015/*.json ./src/package.json README.md ./dist && rm -rf ./tmp"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jchinc/ng-component-seed.git"
+        "url": "git+https://github.com/jchinc/ng-select.git"
     },
     "keywords": [
         "Angular",
@@ -30,25 +26,24 @@
     "author": "José Chin",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/jchinc/ng-component-seed/issues"
+        "url": "https://github.com/jchinc/ng-select/issues"
     },
-    "homepage": "https://github.com/jchinc/ng-component-seed#readme",
-    "peerDependencies": {
-        "@angular/core": ">=4.00 <=5.2.5"
-    },
+    "homepage": "https://github.com/jchinc/ng-select#readme",
     "devDependencies": {
         "@angular/compiler": "^5.2.5",
         "@angular/compiler-cli": "^5.2.5",
-        "gulp": "^3.9.1",
-        "gulp-inline-ng2-template": "^4.1.0",
-        "rollup": "^0.55.5",
-        "typescript": "^2.6.2",
-        "uglify-js": "^3.3.10",
-        "vinyl-fs": "^3.0.2"
+        "gulp-inline-ng2-template": "4.1.0",
+        "rollup": "0.55.5",
+        "typescript": "2.6.2",
+        "uglify-js": "3.3.10",
+        "vinyl-fs": "3.0.2"
     },
     "dependencies": {
+        "@angular/common": "^5.2.5",
         "@angular/core": "^5.2.5",
-        "rxjs": "^5.5.6",
-        "zone.js": "^0.8.20"
+        "@angular/forms": "^5.2.5",
+        "@angular/platform-browser": "^5.2.5",
+        "rxjs": "5.5.6",
+        "zone.js": "0.8.20"
     }
 }

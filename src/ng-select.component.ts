@@ -7,7 +7,9 @@ import {
     Output,
     EventEmitter,
     ViewChild,
-    ElementRef
+    ElementRef,
+    HostListener,
+    Renderer2
 } from '@angular/core';
 import {
     FormBuilder,
@@ -22,6 +24,27 @@ import { INgSelectItem, NgSelectItem } from './ng-select.models';
     styleUrls: ['./ng-select.component.css']
 })
 export class NgSelectComponent implements OnInit {
+
+    selectForm: FormGroup;
+
+    dropdownVisible: boolean = false;
+
+    filteredItems: Array<INgSelectItem> = [];
+
+    itemAll: NgSelectItem;
+
+    hoveredItem: INgSelectItem;
+
+    private _hoveredItemIndex: number = -1;
+
+
+    private set _term(value: string) {
+        this.selectForm.get('term').setValue(value);
+    }
+
+    private get _term(): string {
+        return this.selectForm.get('term').value;
+    }
 
     @Input() source: Array<INgSelectItem> = [];
 
@@ -51,30 +74,33 @@ export class NgSelectComponent implements OnInit {
 
     @Output() tabPressed = new EventEmitter<any>();
 
-    @ViewChild('select') private selectRef: ElementRef;
+    @ViewChild('container') private _containerRef: ElementRef;
 
-    selectForm: FormGroup;
+    @ViewChild('dropdown') private _dropdownRef: ElementRef;
 
-    dropdownVisible: boolean = false;
+    /**
+     * Evento click del documento para determinar si se oculta el dropdown de elementos.
+     * @param event Evento click del mouse
+     */
+    @HostListener('document:click', ['$event'])
+    documentClick(event: MouseEvent): void {
+        if (!event.target) {
+            return;
+        }
 
-    filteredItems: Array<INgSelectItem> = [];
-
-    hoveredItem: INgSelectItem;
-
-    private _hoveredItemIndex: number = -1;
-
-
-    private set _term(value: string) {
-        this.selectForm.get('term').setValue(value);
-    }
-
-    private get _term(): string {
-        return this.selectForm.get('term').value;
+        // Verifica si el elemento donde se realizó el evento está contenido en el elemento HOST de la directiva.
+        let contains = this._containerRef.nativeElement.contains(event.target);
+        if (!contains) {
+            this._hideDropdown();
+        }
     }
 
     constructor(
+        private _renderer: Renderer2,
         private _formBuilder: FormBuilder
     ) {
+        this.itemAll = new NgSelectItem('0', 'Seleccionar todo');
+
         this._createForm();
     }
 
@@ -88,7 +114,7 @@ export class NgSelectComponent implements OnInit {
     }
 
     inputBlur() {
-        if(this.isMultiselect){
+        if (this.isMultiselect) {
             return;
         }
         this.dropdownVisible = false;
@@ -181,25 +207,7 @@ export class NgSelectComponent implements OnInit {
         event: any = null
     ) {
 
-        // Para el caso de que se seleccione con un click en el elemento.
-        // Para evitar el click nativo del elemento.
-        if (event) {
-            event.preventDefault();
-        } else {
-            // Para el caso de que el método NO sea llamado desde el click del mouse.
-            // Cuando el método se llama desde el click del mouse la lista se oculta en itemMouseup.
-            this.dropdownVisible = false;
-        }
-
-        // Verifica si se inicializa el campo de búsqueda después de seleccionar.
-        if (this.clearAfterSelect) {
-            this._term = '';
-        } else {
-            this._term = item.value;
-        }
-
-        this._hoveredItemIndex = -1;
-        this.hoveredItem = null;
+        item.selected = !item.selected;
 
         this.selectedItem.emit(item);
     }
@@ -211,7 +219,7 @@ export class NgSelectComponent implements OnInit {
     itemMouseup(event: any) {
 
         console.log(this.isMultiselect);
-        
+
         if (this.isMultiselect) {
             return;
         }
@@ -301,11 +309,11 @@ export class NgSelectComponent implements OnInit {
      */
     private scrollToView(index: number) {
 
-        if (!this.selectRef) {
+        if (!this._dropdownRef) {
             return;
         }
 
-        const ul = this.selectRef.nativeElement;
+        const ul = this._dropdownRef.nativeElement;
         const scrollTop = ul.scrollTop;
         const viewport = scrollTop + ul.offsetHeight;
         const scrollOffset = this.listItemHeight * index;
@@ -314,5 +322,30 @@ export class NgSelectComponent implements OnInit {
         if (scrollOffset < scrollTop || (scrollOffset + this.listItemHeight) > viewport) {
             ul.scrollTop = scrollOffset;
         }
+    }
+
+    toggleButtonClick(): void {
+        if (this.dropdownVisible) {
+            this._hideDropdown();
+        } else {
+            this._showDropdown();
+        }
+    }
+
+    itemAllClick(): void {
+        this.itemAll.selected = !this.itemAll.selected;
+        this.source.forEach(item => {
+            item.selected = this.itemAll.selected;
+        });
+    }
+
+    private _showDropdown() {
+        this.dropdownVisible = true;
+        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'block');
+    }
+
+    private _hideDropdown() {
+        this.dropdownVisible = false;
+        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'none');
     }
 }

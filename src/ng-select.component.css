@@ -1,3 +1,7 @@
+.ng-select{
+    color:#59595A;
+    position: relative;
+}
 .ng-select__input{
     padding-right: 30px;
     font-size: 14px;
@@ -9,13 +13,33 @@
     margin-bottom: 0;
 }
 
+.ng-select__toggle-button{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+    padding: 5px;
+    border: 1px solid #CCC;
+    cursor: pointer;
+}
+
+.ng-select__toggle-button-caret{
+    width: 0;
+    height: 0;
+    border-top: 4px solid;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+
 .ng-select__dropdown {
     position: absolute;
+    display: none;
     background-color: #FFFFFF;
     width: 100%;
+    min-width: 220px;
     overflow-y: auto;
     list-style-type: none;
-    padding: 8px 0;
+    padding: 0;
     margin: 0;
     border-left: #CCCCCC;
     border-right: #CCCCCC;
@@ -31,25 +55,59 @@
 }
 
 .ng-select__dropdown--raised {
-    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
 }
 
-.ng-select__dropdown-item{
+.ng-select__item{
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 10px;
     height: 48px;
     font-size: 15px;
     overflow: hidden;
 }
 
-.ng-select__dropdown-item--selected {
+.ng-select__item--bordered{
+    border-bottom: 1px solid #CCC;
+}
+
+.ng-select__item--accent .ng-select__values, .ng-select__item--accent .ng-select__search{
+    font-weight: 700;
+}
+
+.ng-select__item--selected {
     background-color: #338FFF;
     font-weight: 700;
 }
 
-.ng-select__dropdown-item:hover{
+.ng-select__item-values{
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+}
+
+.ng-select__item-value{
+
+}
+.ng-select__item-value--secondary{
+    font-size: 0.8em;
+    color: rgba(0,0,0,0.5);
+}
+
+.ng-select__item:hover{
     background-color: rgba(0, 0, 0, .12);
+}
+
+.ng-select__icon{
+    font-size: 22px;
+}
+
+.ng-select__search{
+    padding-left: 10px;
+    border: none;
+    background-color: transparent;
+    outline-style: none;
+    color: inherit;
 }
 
 /*

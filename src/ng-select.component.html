@@ -1,38 +1,58 @@
-<div class="ng-select__container">
+<div #container
+     class="ng-select">
 
-    <!-- Campo de entrada -->
-    <form [formGroup]="selectForm">
-        <div class="ng-select__input-container">
-            <input #input
-                   type="text"
-                   class="ng-select__input"
-                   formControlName="term"
-                   (focus)="inputFocus($event)"
-                   (blur)="inputBlur()"
-                   (keydown)="inputKeydown($event)"
-                   (keyup)="inputKeyup($event)"
-                   (click)="inputClick($event)" />
-        </div>
+    <!-- Botón toggle -->
+    <div class="ng-select__toggle-button"
+         (click)="toggleButtonClick()">
+        <span>Rutas</span>
+        <span class="ng-select__toggle-button-caret"></span>
+    </div>
 
+    <!-- Elementos -->
+    <ul #dropdown
+        class="ng-select__dropdown ng-select__dropdown--raised">
+
+        <!-- Elemento: Seleccionar todo -->
+        <li class="ng-select__item ng-select__item--bordered ng-select__item--secondary"
+            (click)="itemAllClick()">
+            <i *ngIf="itemAll.selected"
+               class="material-icons ng-select__icon">check_box</i>
+            <i *ngIf="!itemAll.selected"
+               class="material-icons ng-select__icon">check_box_outline_blank</i>
+            <div class="ng-select__item-values">
+                {{itemAll.value}}
+            </div>
+        </li>
+
+        <!-- Campo búsqueda -->
+        <li class="ng-select__item ng-select__item--bordered ng-select__item--secondary">
+            <i class="material-icons ng-select__icon">search</i>
+            <input type="text"
+                   placeholder="Buscar"
+                   class="ng-select__search">
+        </li>
 
         <!-- Elementos -->
-        <div 
-             class="ng-select__dropdown-container">
-            <ul #select
-                class="ng-select__dropdown ng-select__dropdown--raised">
-                <li *ngIf="filteredItems.length===0"
-                    class="ng-select__dropdown-item"
-                    [style.height]="listItemHeight+'px'">
-                    {{noRowsText}}
-                </li>
-                <li *ngFor="let item of filteredItems"
-                    class="ng-select__dropdown-item"
-                    (mousedown)="selectItem(item, $event)"
-                    (mouseup)="itemMouseup($event)">
-                    <input type="checkbox"> {{item.value}}
-                </li>
-            </ul>
-        </div>
-
-    </form>
+        <li *ngFor="let item of filteredItems"
+            class="ng-select__item"
+            (mousedown)="selectItem(item, $event)"
+            (mouseup)="itemMouseup($event)">
+            <!-- Elemento seleccionado -->
+            <i *ngIf="item.selected"
+               class="material-icons ng-select__icon">check_box</i>
+            <!-- Elemento NO seleccionado -->
+            <i *ngIf="!item.selected"
+               class="material-icons ng-select__icon">check_box_outline_blank</i>
+            <!-- Texto -->
+            <div class="ng-select__item-values">
+                <span class="ng-select__item-value">
+                    {{item.value}}
+                </span>
+                <span *ngIf="item.valueSecondary"
+                      class="ng-select__item-value--secondary">
+                    {{item.valueSecondary}}
+                </span>
+            </div>
+        </li>
+    </ul>
 </div>

@@ -13,7 +13,7 @@ export class AppComponent {
     rutasSource: Array<NgSelectItem> = [];
 
     constructor(){
-        this.rutasSource.push(new NgSelectItem('1', 'Item 1'));
+        this.rutasSource.push(new NgSelectItem('1', 'Item 1', 'Pruebas'));
         this.rutasSource.push(new NgSelectItem('2', 'Item 2'));
         this.rutasSource.push(new NgSelectItem('3', 'Item 3'));
         this.rutasSource.push(new NgSelectItem('4', 'Item 4'));

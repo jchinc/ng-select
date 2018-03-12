@@ -20,6 +20,7 @@
     height: 30px;
     padding: 5px;
     border: 1px solid #CCC;
+    border-radius: 2px;
     cursor: pointer;
 }
 
@@ -36,8 +37,7 @@
     display: none;
     background-color: #FFFFFF;
     width: 100%;
-    min-width: 220px;
-    overflow-y: auto;
+    min-width: 240px;
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -50,12 +50,16 @@
 }
 
 .ng-select__dropdown-container {
-    position: relative;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .ng-select__dropdown--raised {
     box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+.ng-select__items {
+    overflow-y: auto;
 }
 
 .ng-select__item{
@@ -71,8 +75,9 @@
     border-bottom: 1px solid #CCC;
 }
 
-.ng-select__item--accent .ng-select__values, .ng-select__item--accent .ng-select__search{
-    font-weight: 700;
+.ng-select__item--accent{
+    background-color: rgba(0,0,0,0.025);
+    color: rgba(0,0,0,0.8);
 }
 
 .ng-select__item--selected {
@@ -103,7 +108,9 @@
 }
 
 .ng-select__search{
+    width: 100%;
     padding-left: 10px;
+    padding-right: 3px;
     border: none;
     background-color: transparent;
     outline-style: none;

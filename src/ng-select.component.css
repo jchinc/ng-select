@@ -1,16 +1,12 @@
 .ng-select{
     color:#59595A;
     position: relative;
-}
-.ng-select__input{
-    padding-right: 30px;
-    font-size: 14px;
-    width: 100%;
+    font-family: Roboto, "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
-.ng-select__input-container{
-    position: relative;
-    margin-bottom: 0;
+.ng-select--disabled{
+    pointer-events: none;
+    background-color: rgb(235, 235, 228);
 }
 
 .ng-select__toggle-button{
@@ -35,16 +31,17 @@
 .ng-select__dropdown {
     position: absolute;
     display: none;
+    flex-direction: column;
     background-color: #FFFFFF;
     width: 100%;
     min-width: 240px;
+    max-height: 360px;
     list-style-type: none;
+    margin-top: 2px;
     padding: 0;
-    margin: 0;
-    border-left: #CCCCCC;
-    border-right: #CCCCCC;
     text-align: left;
     font-weight: 500;
+    border: 1px solid #CCCCCC;
     animation: slideDown .1s;
     cursor: default;
 }
@@ -65,35 +62,41 @@
 .ng-select__item{
     display: flex;
     align-items: center;
+    flex-shrink: 0;
     padding: 0 10px;
-    height: 48px;
+    height: 44px;
     font-size: 15px;
+    font-weight: 500;
     overflow: hidden;
 }
 
 .ng-select__item--bordered{
-    border-bottom: 1px solid #CCC;
+    border-bottom: 1px solid #CCCCCC;
 }
 
 .ng-select__item--accent{
-    background-color: rgba(0,0,0,0.025);
+    background-color: rgba(0,0,0,0.04);
     color: rgba(0,0,0,0.8);
 }
 
-.ng-select__item--selected {
-    background-color: #338FFF;
-    font-weight: 700;
+.ng-select__item--no-rows{
+    justify-content: center;
 }
 
 .ng-select__item-values{
     display: flex;
     flex-direction: column;
+    width: 100%;
     padding-left: 10px;
+    padding-right: 23px;
 }
 
 .ng-select__item-value{
-
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .ng-select__item-value--secondary{
     font-size: 0.8em;
     color: rgba(0,0,0,0.5);
@@ -109,12 +112,12 @@
 
 .ng-select__search{
     width: 100%;
-    padding-left: 10px;
-    padding-right: 3px;
+    padding: 10px 3px 10px 10px;
     border: none;
     background-color: transparent;
     outline-style: none;
     color: inherit;
+    font-size: inherit;
 }
 
 /*

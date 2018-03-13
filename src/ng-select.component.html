@@ -1,10 +1,12 @@
 <div #container
-     class="ng-select">
+     class="ng-select"
+     [class.ng-select--disabled]="disabled">
 
     <!-- Botón toggle -->
     <div class="ng-select__toggle-button"
+         [ngClass]="toggleButtonClasses"
          (click)="toggleButtonClick()">
-        <span>Rutas</span>
+        <span>{{selectedItemsKeys}}</span>
         <span class="ng-select__toggle-button-caret"></span>
     </div>
 
@@ -14,7 +16,7 @@
 
         <!-- Elemento: Seleccionar todo -->
         <li class="ng-select__item ng-select__item--bordered ng-select__item--accent"
-            (click)="itemAllClick()">
+            (click)="selectUnselectAll()">
             <i *ngIf="itemAll.selected"
                class="material-icons ng-select__icon">check_box</i>
             <i *ngIf="!itemAll.selected"
@@ -25,19 +27,30 @@
         </li>
 
         <!-- Campo búsqueda -->
-        <li class="ng-select__item ng-select__item--bordered ng-select__item--accent">
-            <i class="material-icons ng-select__icon">search</i>
-            <input type="text"
-                   placeholder="Buscar"
-                   class="ng-select__search">
-        </li>
+        <form [formGroup]="selectForm">
+            <li class="ng-select__item ng-select__item--bordered ng-select__item--accent">
+                <i class="material-icons ng-select__icon">search</i>
+                <input #input
+                       type="text"
+                       [placeholder]="inputSearchPlaceHolder"
+                       class="ng-select__search"
+                       formControlName="term">
+            </li>
+        </form>
 
         <!-- Elementos -->
         <div class="ng-select__items">
+
+            <!-- No existen registros -->
+            <li *ngIf="!filteredItems.length"
+                class="ng-select__item ng-select__item--no-rows">
+                {{noRowsText}}
+            </li>
+
+            <!-- Registros filtrados -->
             <li *ngFor="let item of filteredItems"
                 class="ng-select__item"
-                (mousedown)="selectItem(item, $event)"
-                (mouseup)="itemMouseup($event)">
+                (click)="selectItem(item, $event)">
                 <!-- Elemento seleccionado -->
                 <i *ngIf="item.selected"
                    class="material-icons ng-select__icon">check_box</i>
@@ -50,12 +63,13 @@
                         {{item.value}}
                     </span>
                     <span *ngIf="item.valueSecondary"
-                          class="ng-select__item-value--secondary">
+                          class="ng-select__item-value ng-select__item-value--secondary">
                         {{item.valueSecondary}}
                     </span>
                 </div>
             </li>
+
         </div>
-        
+
     </ul>
 </div>

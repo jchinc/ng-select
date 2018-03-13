@@ -1,6 +1,10 @@
 # ng-select
 Control HTML SELECT ampliado con características de búsqueda, etc...
 
+## Dependencias
+Material-Icons
+Lodash. En caso de que la búsqueda se requiera omitir los acentos.
+
 ## tsconfig.json
 Archivo para configuración typescript durante el desarrollo. Intellisense, etc...
 

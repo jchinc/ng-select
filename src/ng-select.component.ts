@@ -33,10 +33,9 @@ export class NgSelectComponent implements OnInit {
 
     itemAll: NgSelectItem;
 
-    hoveredItem: INgSelectItem;
+    selectedItemsKeys = '';
 
     private _hoveredItemIndex: number = -1;
-
 
     private set _term(value: string) {
         this.selectForm.get('term').setValue(value);
@@ -50,33 +49,27 @@ export class NgSelectComponent implements OnInit {
 
     @Input() top = 0;
 
-    @Input() inputClasses: string[] = [];
-
-    @Input() inputPlaceHolder = '';
+    @Input() inputSearchPlaceHolder = 'Buscar';
 
     @Input() disabled = false;
 
-    @Input() noRowsText = 'No existen registros';
+    @Input() toggleButtonText = '';
 
-    @Input() listItemHeight = 50;
+    @Input() noRowsText = 'No existen registros';
 
     @Input() accentInsensitive = false;
 
-    @Input() clearAfterSelect = true;
+    @Input() toggleButtonClasses: Array<string> = [];
 
-    @Input() isMultiselect = false;
+    @Output() selectedItemsChanged = new EventEmitter<Array<INgSelectItem>>();
 
-    @Output() selectedItem = new EventEmitter<INgSelectItem>();
-
-    @Output() inputFocused = new EventEmitter<any>();
-
-    @Output() inputBlurred = new EventEmitter<any>();
-
-    @Output() tabPressed = new EventEmitter<any>();
+    @Output() selectedItemsKeysChanged = new EventEmitter<string>();
 
     @ViewChild('container') private _containerRef: ElementRef;
 
     @ViewChild('dropdown') private _dropdownRef: ElementRef;
+
+    @ViewChild('input') private _inputRef: ElementRef;
 
     /**
      * Evento click del documento para determinar si se oculta el dropdown de elementos.
@@ -99,6 +92,9 @@ export class NgSelectComponent implements OnInit {
         private _renderer: Renderer2,
         private _formBuilder: FormBuilder
     ) {
+
+        this.selectedItemsKeys = this.toggleButtonText;
+
         this.itemAll = new NgSelectItem('0', 'Seleccionar todo');
 
         this._createForm();
@@ -108,124 +104,31 @@ export class NgSelectComponent implements OnInit {
         this._filterData();
     }
 
-    inputFocus(event: any) {
-        this.dropdownVisible = true;
-        this.inputFocused.emit();
-    }
-
-    inputBlur() {
-        if (this.isMultiselect) {
-            return;
-        }
-        this.dropdownVisible = false;
-        this.inputBlurred.emit();
-    }
-
-    inputClick() {
-        this.dropdownVisible = true;
-    }
-
-    inputKeydown(event: any): void {
-        // TAB.
-        if (event.keyCode === 9) {
-            this.tabPressed.emit(event);
-        }
-    }
-
-    inputKeyup(event: any) {
-
-        // TAB.
-        if (event.keyCode === 9) {
-            return;
-        }
-
-        this.dropdownVisible = true;
-
-        let itemsLength = this.filteredItems.length;
-        if (itemsLength === 0) {
-            return;
-        }
-
-        switch (event.keyCode) {
-            case 9: // TAB
-
-                // if (this.filteredItems.length > 0 && this.hoveredItemIndex !== -1) {
-                //     this.selectItem(this.filteredItems[this.hoveredItemIndex])
-                // }
-                break;
-
-            case 13:    // ENTER
-
-                event.preventDefault();
-                if (this.filteredItems.length > 0 && this._hoveredItemIndex !== -1) {
-                    this.selectItem(this.filteredItems[this._hoveredItemIndex])
-                }
-                break;
-
-            case 27:    // ESCAPE
-
-                this.dropdownVisible = false;
-                break;
-
-            case 38:    // UP
-
-                if (this._hoveredItemIndex > 0) {
-                    // Seleciona el elemento anterior.
-                    this._hoveredItemIndex -= 1;
-                } else {
-                    // Selecciona último elemento.
-                    this._hoveredItemIndex = itemsLength - 1;
-                }
-                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
-                this.scrollToView(this._hoveredItemIndex);
-
-                break;
-
-            case 40:    // DOWN
-
-                if (this._hoveredItemIndex < (itemsLength - 1)) {
-                    // Selecciona siguiente elemento.
-                    this._hoveredItemIndex += 1;
-                } else {
-                    // Selecciona primer elemento.
-                    this._hoveredItemIndex = 0;
-                }
-                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
-                this.scrollToView(this._hoveredItemIndex);
-
-                break;
-        }
-    }
-
     /**
      * Selecciona el elemento indicado
      * @param item Elemento a seleccionar
-     * @param event Evento mousedown para el caso de que se seleccione con un click en la lista
      */
     selectItem(
-        item: INgSelectItem,
-        event: any = null
+        item: INgSelectItem
     ) {
-
         item.selected = !item.selected;
-
-        this.selectedItem.emit(item);
+        this._emitSelectedItemsChanged();
     }
 
-    /**
-     * Evento mouseup sobre un elemento de la lista
-     * @param event Evento del mouse.
-     */
-    itemMouseup(event: any) {
-
-        console.log(this.isMultiselect);
-
-        if (this.isMultiselect) {
-            return;
+    toggleButtonClick(): void {
+        if (this.dropdownVisible) {
+            this._hideDropdown();
+        } else {
+            this._showDropdown();
         }
+    }
 
-        // Se oculta la lista después de levantar el click para evitar que al desaparecer la lista el click afecte a otro elemento.
-        this.dropdownVisible = false;
+    selectUnselectAll(): void {
+        this.itemAll.selected = !this.itemAll.selected;
+        this.source.forEach(item => {
+            item.selected = this.itemAll.selected;
+        });
+        this._emitSelectedItemsChanged();
     }
 
     private _createForm() {
@@ -285,67 +188,54 @@ export class NgSelectComponent implements OnInit {
             match = true;
         }
 
-        // Verifica los campos adicionales de búsqueda. Sólo llegaría a ésta búsqueda si el campo valor NO coincide.
-        // else if (item.filters) {
-        //     for (let filter of item.filters) {
-        //         // No considera valores vacíos.
-        //         if (!filter) {
-        //             continue;
-        //         }
-        //         const filterValue = (this.accentInsensitive ? _.deburr(filter.toLowerCase()) : filter.toLowerCase());
-        //         if (filterValue.indexOf(localTerm) !== -1) {
-        //             // Retornaría que sí coincide la búsqueda en caso de que algún valor de filtro coíncida.
-        //             match = true;
-        //             break;
-        //         }
-        //     }
-        // }
+        //Verifica los campos adicionales de búsqueda. Sólo llegaría a ésta búsqueda si el campo valor NO coincide.
+        else if (item.filters) {
+            for (let filter of item.filters) {
+                // No considera valores vacíos.
+                if (!filter) {
+                    continue;
+                }
+                const filterValue = (this.accentInsensitive ? _.deburr(filter.toLowerCase()) : filter.toLowerCase());
+                if (filterValue.indexOf(localTerm) !== -1) {
+                    // Retornaría que sí coincide la búsqueda en caso de que algún valor de filtro coíncida.
+                    match = true;
+                    break;
+                }
+            }
+        }
 
         return match;
     }
 
-    /**
-     * Ajusta el scroll para visualizar el elemento actualmente seleccionado
-     */
-    private scrollToView(index: number) {
-
-        if (!this._dropdownRef) {
-            return;
-        }
-
-        const ul = this._dropdownRef.nativeElement;
-        const scrollTop = ul.scrollTop;
-        const viewport = scrollTop + ul.offsetHeight;
-        const scrollOffset = this.listItemHeight * index;
-        // scrollOffset < scrollTop : Cuando el elemento seleccionado esté por arriba del espacio desplazado.
-        // (scrollOffset + this.listItemHeight) > viewport  : Cuando el elemento seleccionado esté por abajo del espacio desplazado + altura del espacio de visualización.
-        if (scrollOffset < scrollTop || (scrollOffset + this.listItemHeight) > viewport) {
-            ul.scrollTop = scrollOffset;
-        }
-    }
-
-    toggleButtonClick(): void {
-        if (this.dropdownVisible) {
-            this._hideDropdown();
-        } else {
-            this._showDropdown();
-        }
-    }
-
-    itemAllClick(): void {
-        this.itemAll.selected = !this.itemAll.selected;
-        this.source.forEach(item => {
-            item.selected = this.itemAll.selected;
-        });
-    }
-
-    private _showDropdown() {
+    private _showDropdown(): void {
         this.dropdownVisible = true;
-        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'block');
+        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'flex');
+        this._inputRef.nativeElement.focus();
     }
 
-    private _hideDropdown() {
+    private _hideDropdown(): void {
         this.dropdownVisible = false;
         this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'none');
+    }
+
+    private _emitSelectedItemsChanged(): void {
+
+        let selectedItems: Array<INgSelectItem> = [];
+        this.selectedItemsKeys = '';
+
+        this.source
+            .filter(item => item.selected)
+            .forEach(item => {
+                selectedItems.push(item);
+                // Visualiza los registros seleccionados.
+                this.selectedItemsKeys =
+                    this.selectedItemsKeys +
+                    (this.selectedItemsKeys.length ? ',' : '') +
+                    item.key;
+            });
+
+        // Envía los registros seleccionados.
+        this.selectedItemsChanged.emit(selectedItems);
+        this.selectedItemsKeysChanged.emit(this.selectedItemsKeys);
     }
 }

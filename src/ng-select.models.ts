@@ -3,6 +3,7 @@ export interface INgSelectItem {
     value: string;
     valueSecondary: string;
     selected: boolean;
+    filters: string[]
 }
 
 export class NgSelectItem implements INgSelectItem {
@@ -11,6 +12,7 @@ export class NgSelectItem implements INgSelectItem {
         public key = '',
         public value = '',
         public valueSecondary = '',
-        public selected = false
+        public selected = false,
+        public filters: string[] = []
     ) { }
 }

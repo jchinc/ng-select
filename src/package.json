@@ -1,6 +1,6 @@
 {
     "name": "@jchinc/ng-select",
-    "version": "1.0.13",
+    "version": "1.0.15",
     "description": "Control HTML SELECT ampliado con características de búsqueda, etc...",
     "main": "./bundles/ng-select.umd.js",
     "module": "./esm5/ng-select.js",

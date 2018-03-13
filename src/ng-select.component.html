@@ -32,14 +32,18 @@
                 <i class="material-icons ng-select__icon">search</i>
                 <input #input
                        type="text"
-                       [placeholder]="inputSearchPlaceHolder"
                        class="ng-select__search"
+                       [placeholder]="inputSearchPlaceHolder"
+                       (keyup)="inputKeyup($event)"
                        formControlName="term">
+                <i class="material-icons ng-select__icon ng-select__icon--close"
+                   (click)="clearTerm()">close</i>
             </li>
         </form>
 
         <!-- Elementos -->
-        <div class="ng-select__items">
+        <div #dropdownItems
+             class="ng-select__items">
 
             <!-- No existen registros -->
             <li *ngIf="!filteredItems.length"
@@ -50,6 +54,7 @@
             <!-- Registros filtrados -->
             <li *ngFor="let item of filteredItems"
                 class="ng-select__item"
+                [class.ng-select__item--selected]="item===hoveredItem"
                 (click)="selectItem(item, $event)">
                 <!-- Elemento seleccionado -->
                 <i *ngIf="item.selected"

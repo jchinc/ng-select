@@ -19,6 +19,13 @@ export class AppComponent {
         this.rutasSource.push(new NgSelectItem('3', 'Item 3'));
         this.rutasSource.push(new NgSelectItem('4', 'Item 4'));
         this.rutasSource.push(new NgSelectItem('5', 'Item 5'));
+        this.rutasSource.push(new NgSelectItem('3', 'Item 6'));
+        this.rutasSource.push(new NgSelectItem('4', 'Item 7'));
+        this.rutasSource.push(new NgSelectItem('5', 'Item 8'));
+        this.rutasSource.push(new NgSelectItem('3', 'Item 9'));
+        this.rutasSource.push(new NgSelectItem('4', 'Item 10'));
+        this.rutasSource.push(new NgSelectItem('5', 'Item 11'));
+        this.rutasSource.push(new NgSelectItem('5', 'Item 12'));
     }
 
     changes(items: Array<INgSelectItem>) {

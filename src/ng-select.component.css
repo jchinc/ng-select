@@ -70,13 +70,19 @@
     overflow: hidden;
 }
 
+.ng-select__item--selected{
+    background-color: #338FFF;
+    font-weight: 700;
+    color: white;
+}
+
 .ng-select__item--bordered{
     border-bottom: 1px solid #CCCCCC;
 }
 
 .ng-select__item--accent{
     background-color: rgba(0,0,0,0.04);
-    color: rgba(0,0,0,0.8);
+    opacity: 0.7;
 }
 
 .ng-select__item--no-rows{
@@ -99,15 +105,19 @@
 
 .ng-select__item-value--secondary{
     font-size: 0.8em;
-    color: rgba(0,0,0,0.5);
+    opacity: 0.6;
 }
 
-.ng-select__item:hover{
+.ng-select__item:hover:not(.ng-select__item--no-rows){
     background-color: rgba(0, 0, 0, .12);
 }
 
 .ng-select__icon{
     font-size: 22px;
+}
+
+.ng-select__icon--close{
+    cursor: pointer;
 }
 
 .ng-select__search{

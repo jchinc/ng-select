@@ -35,7 +35,13 @@ export class NgSelectComponent implements OnInit {
 
     selectedItemsKeys = '';
 
+    hoveredItem: INgSelectItem;
     private _hoveredItemIndex: number = -1;
+
+    /**
+     * Altura de los elementos de la caja de selección.
+     */
+    private _listItemHeight: number = 44;
 
     private set _term(value: string) {
         this.selectForm.get('term').setValue(value);
@@ -68,6 +74,8 @@ export class NgSelectComponent implements OnInit {
     @ViewChild('container') private _containerRef: ElementRef;
 
     @ViewChild('dropdown') private _dropdownRef: ElementRef;
+
+    @ViewChild('dropdownItems') private _dropdownItemsRef: ElementRef;
 
     @ViewChild('input') private _inputRef: ElementRef;
 
@@ -127,6 +135,10 @@ export class NgSelectComponent implements OnInit {
     ) {
         item.selected = !item.selected;
         this._emitSelectedItemsChanged();
+
+        // Inicializa el item sombreado con el teclado. Si se hubiese indicado alguno.
+        this._hoveredItemIndex = -1;
+        this.hoveredItem = null;
     }
 
     toggleButtonClick(): void {
@@ -143,6 +155,58 @@ export class NgSelectComponent implements OnInit {
             item.selected = this.itemAll.selected;
         });
         this._emitSelectedItemsChanged();
+    }
+
+    clearTerm(): void {
+        this._term = '';
+        this._inputRef.nativeElement.focus();
+    }
+
+    inputKeyup(event: KeyboardEvent): void {
+
+        let itemsLength = this.filteredItems.length;
+        if (itemsLength === 0) {
+            return;
+        }
+
+        switch (event.keyCode) {
+
+            case 13:    // ENTER
+
+                event.preventDefault();
+                if (this.filteredItems.length > 0 && this._hoveredItemIndex !== -1) {
+                    this.selectItem(this.hoveredItem)
+                }
+                break;
+
+            case 38:    // UP
+
+                if (this._hoveredItemIndex > 0) {
+                    // Seleciona el elemento anterior.
+                    this._hoveredItemIndex -= 1;
+                } else {
+                    // Selecciona último elemento.
+                    this._hoveredItemIndex = itemsLength - 1;
+                }
+                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
+                this._scrollToView(this._hoveredItemIndex);
+
+                break;
+
+            case 40:    // DOWN
+
+                if (this._hoveredItemIndex < (itemsLength - 1)) {
+                    // Selecciona siguiente elemento.
+                    this._hoveredItemIndex += 1;
+                } else {
+                    // Selecciona primer elemento.
+                    this._hoveredItemIndex = 0;
+                }
+                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
+                this._scrollToView(this._hoveredItemIndex);
+
+                break;
+        }
     }
 
     private _createForm() {
@@ -251,5 +315,25 @@ export class NgSelectComponent implements OnInit {
         // Envía los registros seleccionados.
         this.selectedItemsChanged.emit(selectedItems);
         this.selectedItemsKeysChanged.emit(this.selectedItemsKeys);
+    }
+
+    /**
+     * Ajusta el scroll para visualizar el elemento actualmente seleccionado
+     */
+    private _scrollToView(index: number) {
+
+        if (!this._dropdownItemsRef) {
+            return;
+        }
+
+        const dropdownItems = this._dropdownItemsRef.nativeElement;
+        const scrollTop = dropdownItems.scrollTop;
+        const viewport = scrollTop + dropdownItems.offsetHeight;
+        const scrollOffset = this._listItemHeight * index;
+        // scrollOffset < scrollTop : Cuando el elemento seleccionado esté por arriba del espacio desplazado.
+        // (scrollOffset + this.listItemHeight) > viewport  : Cuando el elemento seleccionado esté por abajo del espacio desplazado + altura del espacio de visualización.
+        if (scrollOffset < scrollTop || (scrollOffset + this._listItemHeight) > viewport) {
+            dropdownItems.scrollTop = scrollOffset;
+        }
     }
 }

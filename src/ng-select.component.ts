@@ -77,6 +77,7 @@ export class NgSelectComponent implements OnInit {
      */
     @HostListener('document:click', ['$event'])
     documentClick(event: MouseEvent): void {
+
         if (!event.target) {
             return;
         }
@@ -84,6 +85,19 @@ export class NgSelectComponent implements OnInit {
         // Verifica si el elemento donde se realizó el evento está contenido en el elemento HOST de la directiva.
         let contains = this._containerRef.nativeElement.contains(event.target);
         if (!contains) {
+            this._hideDropdown();
+        }
+    }
+
+    /**
+     * Evento tecla ESCAPE del documento para determinar si se oculta el dropdown de elementos.
+     * @param event Evento tecla
+     */
+    @HostListener('document:keyup', ['$event'])
+    documentKeyup(event: KeyboardEvent): void {
+
+        // Tecla SCAPE.
+        if (event.keyCode === 27) {
             this._hideDropdown();
         }
     }

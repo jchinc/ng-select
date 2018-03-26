@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
-import { NgSelectModule } from '@jchinc/ng-select';
+import { NgMultiselectModule } from '@jchinc/ng-multiselect';
 
 @NgModule({
   declarations: [
@@ -10,7 +10,7 @@ import { NgSelectModule } from '@jchinc/ng-select';
   ],
   imports: [
     BrowserModule,
-    NgSelectModule
+    NgMultiselectModule
   ],
   providers: [],
   bootstrap: [AppComponent]

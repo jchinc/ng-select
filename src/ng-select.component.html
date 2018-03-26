@@ -6,7 +6,7 @@
     <div class="ng-select__toggle-button"
          [ngClass]="toggleButtonClasses"
          (click)="toggleButtonClick()">
-        <span>{{selectedItemsKeys}}</span>
+        <span class="ng-select__toggle-button-value">{{selectedItemsKeys}}</span>
         <span class="ng-select__toggle-button-caret"></span>
     </div>
 
@@ -15,7 +15,8 @@
         class="ng-select__dropdown ng-select__dropdown--raised">
 
         <!-- Elemento: Seleccionar todo -->
-        <li class="ng-select__item ng-select__item--bordered ng-select__item--accent"
+        <li *ngIf="isMultiselect"
+            class="ng-select__item ng-select__item--bordered ng-select__item--accent"
             (click)="selectUnselectAll()">
             <i *ngIf="itemAll.selected"
                class="material-icons ng-select__icon">check_box</i>
@@ -36,7 +37,8 @@
                        [placeholder]="inputSearchPlaceHolder"
                        (keyup)="inputKeyup($event)"
                        formControlName="term">
-                <i class="material-icons ng-select__icon ng-select__icon--close"
+                <i [style.display]="term?'inherit':'none'"
+                   class="material-icons ng-select__icon ng-select__icon--close"
                    (click)="clearTerm()">close</i>
             </li>
         </form>
@@ -54,21 +56,24 @@
             <!-- Registros filtrados -->
             <li *ngFor="let item of filteredItems"
                 class="ng-select__item"
-                [class.ng-select__item--selected]="item===hoveredItem"
+                [class.ng-select__item--selected]="isMultiselect && item===hoveredItem"
+                [class.ng-select__item--selected]="!isMultiselect && (item.selected || item===hoveredItem)"
                 (click)="selectItem(item, $event)">
                 <!-- Elemento seleccionado -->
-                <i *ngIf="item.selected"
+                <i *ngIf="item.selected && isMultiselect"
                    class="material-icons ng-select__icon">check_box</i>
                 <!-- Elemento NO seleccionado -->
-                <i *ngIf="!item.selected"
+                <i *ngIf="!item.selected && isMultiselect"
                    class="material-icons ng-select__icon">check_box_outline_blank</i>
                 <!-- Texto -->
                 <div class="ng-select__item-values">
-                    <span class="ng-select__item-value">
+                    <span class="ng-select__item-value"
+                          [title]="item.value">
                         {{item.value}}
                     </span>
                     <span *ngIf="item.valueSecondary"
-                          class="ng-select__item-value ng-select__item-value--secondary">
+                          class="ng-select__item-value ng-select__item-value--secondary"
+                          [title]="item.valueSecondary">
                         {{item.valueSecondary}}
                     </span>
                 </div>

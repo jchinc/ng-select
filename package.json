@@ -1,7 +1,7 @@
 {
     "name": "@jchinc/ng-select",
-    "version": "1.0.16",
-    "description": "Control HTML SELECT ampliado con características de búsqueda, etc...",
+    "version": "1.0.17",
+    "description": "Control de selección de elementos, con opción de seleccionar varios",
     "scripts": {
         "build": "npm run clean && npm run build:inline && npm run build:esm2015 && npm run build:fesm2015 && npm run build:esm5 && npm run build:fesm5 && npm run build:umd && npm run build:min && npm run move:assets",
         "clean": "rm -rf ./dist && rm -rf ./tmp",

@@ -3,6 +3,8 @@ declare var _: any;
 import {
     Component,
     OnInit,
+    OnChanges,
+    SimpleChanges,
     Input,
     Output,
     EventEmitter,
@@ -23,7 +25,7 @@ import { INgSelectItem, NgSelectItem } from './ng-select.models';
     templateUrl: './ng-select.component.html',
     styleUrls: ['./ng-select.component.css']
 })
-export class NgSelectComponent implements OnInit {
+export class NgSelectComponent implements OnInit, OnChanges {
 
     selectForm: FormGroup;
 
@@ -38,22 +40,29 @@ export class NgSelectComponent implements OnInit {
     hoveredItem: INgSelectItem;
     private _hoveredItemIndex: number = -1;
 
+    private _selectedItems: Array<INgSelectItem> = [];
+
     /**
      * Altura de los elementos de la caja de selección.
      */
     private _listItemHeight: number = 44;
 
-    private set _term(value: string) {
+    set term(value: string) {
         this.selectForm.get('term').setValue(value);
     }
 
-    private get _term(): string {
+    get term(): string {
         return this.selectForm.get('term').value;
     }
 
     @Input() source: Array<INgSelectItem> = [];
 
     @Input() top = 0;
+
+    /**
+     * Para permitir que funcione como un select de 1 sólo registro.
+     */
+    @Input() isMultiselect = false;
 
     @Input() inputSearchPlaceHolder = 'Buscar';
 
@@ -114,16 +123,19 @@ export class NgSelectComponent implements OnInit {
         private _renderer: Renderer2,
         private _formBuilder: FormBuilder
     ) {
-
-        this.selectedItemsKeys = this.toggleButtonText;
-
-        this.itemAll = new NgSelectItem('0', 'Seleccionar todo');
-
         this._createForm();
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+
+        // Si cambia el origen de datos del control se reinicia.
+        if (changes['source']) {
+            this._initialize();
+        }
+    }
+
     ngOnInit(): void {
-        this._filterData();
+        this._initialize();
     }
 
     /**
@@ -132,13 +144,28 @@ export class NgSelectComponent implements OnInit {
      */
     selectItem(
         item: INgSelectItem
-    ) {
+    ): void {
+
+        // Deselecciona cualquier elemento seleccionado.
+        if (!this.isMultiselect) {
+            this.source.forEach(item => {
+                item.selected = false;
+            });
+        }
+
+        // Elemento seleccionado.
         item.selected = !item.selected;
-        this._emitSelectedItemsChanged();
+
+        // Elementos seleccionados.
+        this._setSelectedItems();
 
         // Inicializa el item sombreado con el teclado. Si se hubiese indicado alguno.
         this._hoveredItemIndex = -1;
         this.hoveredItem = null;
+
+        if (!this.isMultiselect) {
+            this._hideDropdown();
+        }
     }
 
     toggleButtonClick(): void {
@@ -149,16 +176,20 @@ export class NgSelectComponent implements OnInit {
         }
     }
 
+    /**
+     * Selecciona/desselecciona todos los registros filtrados.
+     */
     selectUnselectAll(): void {
         this.itemAll.selected = !this.itemAll.selected;
-        this.source.forEach(item => {
+        this.filteredItems.forEach(item => {
             item.selected = this.itemAll.selected;
         });
-        this._emitSelectedItemsChanged();
+        // Elementos seleccionados.
+        this._setSelectedItems();
     }
 
     clearTerm(): void {
-        this._term = '';
+        this.term = '';
         this._inputRef.nativeElement.focus();
     }
 
@@ -209,7 +240,22 @@ export class NgSelectComponent implements OnInit {
         }
     }
 
-    private _createForm() {
+    private _initialize(): void {
+
+        this.itemAll = new NgSelectItem('0', 'Seleccionar todo');
+
+        this.term = '';
+
+        this.selectedItemsKeys = this.toggleButtonText;
+
+        // Inicializa los registros filtrados. Todos los items.
+        this._filterData();
+
+        // Marca o asigna elementos seleccionados.
+        this._setSelectedItems();
+    }
+
+    private _createForm(): void {
 
         // Control para captura. Término de búsqueda.
         let term = this._formBuilder.control('');
@@ -225,7 +271,7 @@ export class NgSelectComponent implements OnInit {
         });
     }
 
-    private _filterData(term?: string) {
+    private _filterData(term?: string): void {
 
         // Límite de registros filtrados.
         let top = (this.top > 0) ? this.top : this.source.length;
@@ -252,7 +298,10 @@ export class NgSelectComponent implements OnInit {
         }
     }
 
-    private _match(item: INgSelectItem, term: string): boolean {
+    private _match(
+        item: INgSelectItem,
+        term: string
+    ): boolean {
 
         // Por defecto el registro no coincide.
         let match = false;
@@ -296,31 +345,47 @@ export class NgSelectComponent implements OnInit {
         this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'none');
     }
 
-    private _emitSelectedItemsChanged(): void {
+    private _setSelectedItems(): void {
 
-        let selectedItems: Array<INgSelectItem> = [];
+        // Número de registros seleccionados previamente.
+        let selectedItemsLength = this._selectedItems.length;
+
+        this._selectedItems = [];
         this.selectedItemsKeys = '';
 
+        // Elementos seleccionados.
         this.source
             .filter(item => item.selected)
             .forEach(item => {
-                selectedItems.push(item);
-                // Visualiza los registros seleccionados.
-                this.selectedItemsKeys =
-                    this.selectedItemsKeys +
-                    (this.selectedItemsKeys.length ? ',' : '') +
-                    item.key;
+                this._selectedItems.push(item);
+                if (this.isMultiselect) {
+                    // Visualiza los registros seleccionados.
+                    this.selectedItemsKeys =
+                        this.selectedItemsKeys +
+                        (this.selectedItemsKeys.length ? ',' : '') +
+                        item.key;
+                } else {
+                    // Visualiza el texto del elemento seleccionado.
+                    this.selectedItemsKeys = item.value;
+                    selectedItemsLength = 0;
+                }
             });
 
-        // Envía los registros seleccionados.
-        this.selectedItemsChanged.emit(selectedItems);
-        this.selectedItemsKeysChanged.emit(this.selectedItemsKeys);
+        // En caso de que no haya elemento seleccionado se coloca el texto especificado para el botón toggle.
+        if (this._selectedItems.length === 0) {
+            this.selectedItemsKeys = this.toggleButtonText;
+        }
+
+        // Indica un cambio de registros seleccionados.
+        if (selectedItemsLength !== this._selectedItems.length) {
+            this.selectedItemsChanged.emit(this._selectedItems);
+        }
     }
 
     /**
      * Ajusta el scroll para visualizar el elemento actualmente seleccionado
      */
-    private _scrollToView(index: number) {
+    private _scrollToView(index: number): void {
 
         if (!this._dropdownItemsRef) {
             return;

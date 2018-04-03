@@ -1,9 +1,9 @@
 <div class="select__container">
-    <ng-multiselect [source]="rutasSource"
+    <ng-select [source]="rutasSource"
                     [accentInsensitive]="true"
-                    [onlyOneRow]="true"
+                    [isMultiselect]="false"
                     (selectedItemsChanged)="changes($event)"
-                    [toggleButtonText]="'Rutas'"></ng-multiselect>
+                    [toggleButtonText]="'Rutas'"></ng-select>
 
     <button (click)="resetSource()">Actualizar origen de datos</button>
 </div>

@@ -19,6 +19,7 @@ import {
 } from '@angular/forms';
 
 import { INgSelectItem, NgSelectItem } from './ng-select.models';
+import { classes } from './ng-select.constants';
 
 @Component({
     selector: 'ng-select',
@@ -29,16 +30,15 @@ export class NgSelectComponent implements OnInit, OnChanges {
 
     selectForm: FormGroup;
 
-    dropdownVisible: boolean = false;
-
     filteredItems: Array<INgSelectItem> = [];
 
-    itemAll: NgSelectItem;
+    itemSelectAll: NgSelectItem;
 
     selectedItemsKeys = '';
 
+    selectedItem: INgSelectItem;
+
     hoveredItem: INgSelectItem;
-    private _hoveredItemIndex: number = -1;
 
     private _selectedItems: Array<INgSelectItem> = [];
 
@@ -54,6 +54,12 @@ export class NgSelectComponent implements OnInit, OnChanges {
     get term(): string {
         return this.selectForm.get('term').value;
     }
+
+    /**
+     * ---------------------------------------------------------------------------------
+     * Variables INPUT
+     * ---------------------------------------------------------------------------------
+     */
 
     @Input() source: Array<INgSelectItem> = [];
 
@@ -76,17 +82,51 @@ export class NgSelectComponent implements OnInit, OnChanges {
 
     @Input() toggleButtonClasses: Array<string> = [];
 
+    @Input() maxItemsVisible = 7;
+
+    /**
+     * ---------------------------------------------------------------------------------
+     * Variables OUTPUT
+     * ---------------------------------------------------------------------------------
+     */
+
+    @Output() selectedItemChanged = new EventEmitter<INgSelectItem>();
+
     @Output() selectedItemsChanged = new EventEmitter<Array<INgSelectItem>>();
 
     @Output() selectedItemsKeysChanged = new EventEmitter<string>();
 
+    /**
+     * ---------------------------------------------------------------------------------
+     * Variables VIEWCHILD
+     * ---------------------------------------------------------------------------------
+     */
+
     @ViewChild('container') private _containerRef: ElementRef;
-
-    @ViewChild('dropdown') private _dropdownRef: ElementRef;
-
-    @ViewChild('dropdownItems') private _dropdownItemsRef: ElementRef;
+    private get _container(): HTMLElement {
+        return this._containerRef.nativeElement;
+    }
 
     @ViewChild('input') private _inputRef: ElementRef;
+    private get _input(): HTMLElement {
+        return this._inputRef.nativeElement;
+    }
+
+    @ViewChild('dropdown') private _dropdownRef: ElementRef;
+    private get _dropdown(): HTMLElement {
+        return this._dropdownRef.nativeElement;
+    }
+
+    @ViewChild('dropdownItems') private _dropdownItemsRef: ElementRef;
+    private get _dropdownItems(): HTMLElement {
+        return this._dropdownItemsRef.nativeElement;
+    }
+
+    /**
+     * ---------------------------------------------------------------------------------
+     * Eventos del HOST
+     * ---------------------------------------------------------------------------------
+     */
 
     /**
      * Evento click del documento para determinar si se oculta el dropdown de elementos.
@@ -100,7 +140,7 @@ export class NgSelectComponent implements OnInit, OnChanges {
         }
 
         // Verifica si el elemento donde se realizó el evento está contenido en el elemento HOST de la directiva.
-        let contains = this._containerRef.nativeElement.contains(event.target);
+        let contains = this._container.contains(<Node>event.target);
         if (!contains) {
             this._hideDropdown();
         }
@@ -119,6 +159,12 @@ export class NgSelectComponent implements OnInit, OnChanges {
         }
     }
 
+    /**
+     * ---------------------------------------------------------------------------------
+     * Sección del COMPONENTE
+     * ---------------------------------------------------------------------------------
+     */
+
     constructor(
         private _renderer: Renderer2,
         private _formBuilder: FormBuilder
@@ -129,8 +175,15 @@ export class NgSelectComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
 
         // Si cambia el origen de datos del control se reinicia.
-        if (changes['source']) {
+        if (changes['source'] || changes['isMultiselect']) {
             this._initialize();
+        }
+
+        if (changes['maxItemsVisible']) {
+            if (!this.maxItemsVisible) {
+                this.maxItemsVisible = 7;
+            }
+            this._setContainerMaxHeight();
         }
     }
 
@@ -146,30 +199,37 @@ export class NgSelectComponent implements OnInit, OnChanges {
         item: INgSelectItem
     ): void {
 
-        // Deselecciona cualquier elemento seleccionado.
+        // Selección única
         if (!this.isMultiselect) {
-            this.source.forEach(item => {
-                item.selected = false;
-            });
-        }
 
-        // Elemento seleccionado.
-        item.selected = !item.selected;
+            // Visualiza el texto del elemento seleccionado.
+            this.selectedItemsKeys = item.value;
 
-        // Elementos seleccionados.
-        this._setSelectedItems();
-
-        // Inicializa el item sombreado con el teclado. Si se hubiese indicado alguno.
-        this._hoveredItemIndex = -1;
-        this.hoveredItem = null;
-
-        if (!this.isMultiselect) {
+            // Oculta dropdown.
             this._hideDropdown();
+
+            // Indica que se seleccionó otro elemento.
+            if (item !== this.selectedItem) {
+                this.selectedItemChanged.emit(item);
+            }
+
+            // Item seleccionado.
+            this.selectedItem = item;
+
+        }
+        // Selección múltiple
+        else {
+
+            // Elemento seleccionado.
+            item.selected = !item.selected;
+
+            // Elementos seleccionados.
+            this._setSelectedItems();
         }
     }
 
     toggleButtonClick(): void {
-        if (this.dropdownVisible) {
+        if (this._dropdown.classList.contains(classes.DROPDOWN_SHOWN)) {
             this._hideDropdown();
         } else {
             this._showDropdown();
@@ -180,9 +240,9 @@ export class NgSelectComponent implements OnInit, OnChanges {
      * Selecciona/desselecciona todos los registros filtrados.
      */
     selectUnselectAll(): void {
-        this.itemAll.selected = !this.itemAll.selected;
+        this.itemSelectAll.selected = !this.itemSelectAll.selected;
         this.filteredItems.forEach(item => {
-            item.selected = this.itemAll.selected;
+            item.selected = this.itemSelectAll.selected;
         });
         // Elementos seleccionados.
         this._setSelectedItems();
@@ -190,7 +250,7 @@ export class NgSelectComponent implements OnInit, OnChanges {
 
     clearTerm(): void {
         this.term = '';
-        this._inputRef.nativeElement.focus();
+        this._input.focus();
     }
 
     inputKeyup(event: KeyboardEvent): void {
@@ -200,41 +260,46 @@ export class NgSelectComponent implements OnInit, OnChanges {
             return;
         }
 
+        let hoveredItemIndex = -1;
+        if (this.hoveredItem) {
+            hoveredItemIndex = this.filteredItems.indexOf(this.hoveredItem);
+        }
+
         switch (event.keyCode) {
 
             case 13:    // ENTER
 
                 event.preventDefault();
-                if (this.filteredItems.length > 0 && this._hoveredItemIndex !== -1) {
+                if (this.filteredItems.length > 0 && this.hoveredItem) {
                     this.selectItem(this.hoveredItem)
                 }
                 break;
 
             case 38:    // UP
 
-                if (this._hoveredItemIndex > 0) {
+                if (hoveredItemIndex > 0) {
                     // Seleciona el elemento anterior.
-                    this._hoveredItemIndex -= 1;
+                    hoveredItemIndex -= 1;
                 } else {
                     // Selecciona último elemento.
-                    this._hoveredItemIndex = itemsLength - 1;
+                    hoveredItemIndex = itemsLength - 1;
                 }
-                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
-                this._scrollToView(this._hoveredItemIndex);
+                this.hoveredItem = this.filteredItems[hoveredItemIndex];
+                this._scrollToView(hoveredItemIndex);
 
                 break;
 
             case 40:    // DOWN
 
-                if (this._hoveredItemIndex < (itemsLength - 1)) {
+                if (hoveredItemIndex < (itemsLength - 1)) {
                     // Selecciona siguiente elemento.
-                    this._hoveredItemIndex += 1;
+                    hoveredItemIndex += 1;
                 } else {
                     // Selecciona primer elemento.
-                    this._hoveredItemIndex = 0;
+                    hoveredItemIndex = 0;
                 }
-                this.hoveredItem = this.filteredItems[this._hoveredItemIndex];
-                this._scrollToView(this._hoveredItemIndex);
+                this.hoveredItem = this.filteredItems[hoveredItemIndex];
+                this._scrollToView(hoveredItemIndex);
 
                 break;
         }
@@ -242,17 +307,31 @@ export class NgSelectComponent implements OnInit, OnChanges {
 
     private _initialize(): void {
 
-        this.itemAll = new NgSelectItem('0', 'Seleccionar todo');
-
         this.term = '';
-
+        this._setContainerMaxHeight();
         this.selectedItemsKeys = this.toggleButtonText;
 
         // Inicializa los registros filtrados. Todos los items.
         this._filterData();
 
-        // Marca o asigna elementos seleccionados.
-        this._setSelectedItems();
+        if (this.isMultiselect) {
+
+            this.itemSelectAll = new NgSelectItem('0', 'Seleccionar todo');
+
+            this.source.forEach(item => {
+                item.selected = false;
+            });
+
+            // Marca o asigna elementos seleccionados.
+            this._setSelectedItems();
+
+        } else {
+            this.selectedItem = null;
+        }
+    }
+
+    private _setContainerMaxHeight() {
+        this._renderer.setStyle(this._dropdown, 'max-height', `${this._listItemHeight * (this.maxItemsVisible + 1)}px`)
     }
 
     private _createForm(): void {
@@ -335,14 +414,30 @@ export class NgSelectComponent implements OnInit, OnChanges {
     }
 
     private _showDropdown(): void {
-        this.dropdownVisible = true;
-        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'flex');
-        this._inputRef.nativeElement.focus();
+
+        this._renderer.addClass(this._dropdown, classes.DROPDOWN_SHOWN);
+        this._input.focus();
+
+        setTimeout(() => {
+            // Cuando NO sea mutiselect, se visualiza el elemento seleccionado.
+            if (!this.isMultiselect && this.selectedItem) {
+
+                let index = this.filteredItems.indexOf(this.selectedItem);
+                this._scrollToView(index);
+
+                // 
+                this.hoveredItem = this.selectedItem;
+            }
+        }, 0);
     }
 
     private _hideDropdown(): void {
-        this.dropdownVisible = false;
-        this._renderer.setStyle(this._dropdownRef.nativeElement, 'display', 'none');
+        
+        // Inicializa el item sombreado con el teclado. Si se hubiese indicado alguno.
+        this.hoveredItem = null;
+
+        // Oculta el contenedor de items.
+        this._renderer.removeClass(this._dropdown, classes.DROPDOWN_SHOWN);
     }
 
     private _setSelectedItems(): void {
@@ -358,17 +453,11 @@ export class NgSelectComponent implements OnInit, OnChanges {
             .filter(item => item.selected)
             .forEach(item => {
                 this._selectedItems.push(item);
-                if (this.isMultiselect) {
-                    // Visualiza los registros seleccionados.
-                    this.selectedItemsKeys =
-                        this.selectedItemsKeys +
-                        (this.selectedItemsKeys.length ? ',' : '') +
-                        item.key;
-                } else {
-                    // Visualiza el texto del elemento seleccionado.
-                    this.selectedItemsKeys = item.value;
-                    selectedItemsLength = 0;
-                }
+                // Visualiza los registros seleccionados.
+                this.selectedItemsKeys =
+                    this.selectedItemsKeys +
+                    (this.selectedItemsKeys.length ? ',' : '') +
+                    item.key;
             });
 
         // En caso de que no haya elemento seleccionado se coloca el texto especificado para el botón toggle.
@@ -387,18 +476,29 @@ export class NgSelectComponent implements OnInit, OnChanges {
      */
     private _scrollToView(index: number): void {
 
-        if (!this._dropdownItemsRef) {
-            return;
-        }
+        const dropdownItems = this._dropdownItems;
 
-        const dropdownItems = this._dropdownItemsRef.nativeElement;
+        // Posición o distancia recorrida del scroll (parte superior del contenido).
         const scrollTop = dropdownItems.scrollTop;
-        const viewport = scrollTop + dropdownItems.offsetHeight;
-        const scrollOffset = this._listItemHeight * index;
-        // scrollOffset < scrollTop : Cuando el elemento seleccionado esté por arriba del espacio desplazado.
-        // (scrollOffset + this.listItemHeight) > viewport  : Cuando el elemento seleccionado esté por abajo del espacio desplazado + altura del espacio de visualización.
-        if (scrollOffset < scrollTop || (scrollOffset + this._listItemHeight) > viewport) {
-            dropdownItems.scrollTop = scrollOffset;
+
+        // Altura del contenedor + distancia recorrida del scroll.
+        // Para verificar si el elemento seleccionado está por debajo de éste (incluyendo la altura del item).
+        const viewport = dropdownItems.offsetHeight + scrollTop;
+
+        // Posición superior del elemento seleccionado con respecto a su índice.
+        const selectedItemTop = this._listItemHeight * index;
+
+        // Posición inferior del elemento seleccionado con respecto a su índice.
+        const selectedItemBottom = selectedItemTop + this._listItemHeight;
+
+        // Cuando el elemento seleccionado esté por arriba del espacio desplazado.
+        if (selectedItemTop < scrollTop) {
+            dropdownItems.scrollTop = selectedItemTop;
+        }
+        // Cuando el elemento seleccionado esté por abajo del espacio desplazado + altura del espacio de visualización.
+        // -1 debido al borde.
+        else if (selectedItemBottom > viewport) {
+            dropdownItems.scrollTop = selectedItemBottom - dropdownItems.offsetHeight - 1;
         }
     }
 }

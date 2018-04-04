@@ -44,7 +44,6 @@
     background-color: #FFFFFF;
     width: 100%;
     min-width: 240px;
-    max-height: 360px;
     list-style-type: none;
     margin-top: 2px;
     padding: 0;
@@ -63,6 +62,10 @@
 
 .ng-select__dropdown--raised {
     box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.ng-select__dropdown--shown {
+    display: flex;
 }
 
 .ng-select__items {
@@ -117,6 +120,10 @@
     opacity: 0.6;
 }
 
+.ng-select__item--hovered {
+    background-color: rgba(0, 0, 0, .12);
+}
+
 .ng-select__item:hover:not(.ng-select__item--no-rows):not(.ng-select__item--selected) {
     background-color: rgba(0, 0, 0, .12);
 }
@@ -142,7 +149,6 @@
     font-size: inherit;
     font-weight: 400;
 }
-
 
 /*
 Animación al visualizar el dropdown.

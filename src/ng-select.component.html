@@ -18,12 +18,12 @@
         <li *ngIf="isMultiselect"
             class="ng-select__item ng-select__item--bordered ng-select__item--accent"
             (click)="selectUnselectAll()">
-            <i *ngIf="itemAll.selected"
+            <i *ngIf="itemSelectAll.selected"
                class="material-icons ng-select__icon">check_box</i>
-            <i *ngIf="!itemAll.selected"
+            <i *ngIf="!itemSelectAll.selected"
                class="material-icons ng-select__icon">check_box_outline_blank</i>
             <div class="ng-select__item-values">
-                {{itemAll.value}}
+                {{itemSelectAll.value}}
             </div>
         </li>
 
@@ -53,31 +53,57 @@
                 {{noRowsText}}
             </li>
 
-            <!-- Registros filtrados -->
-            <li *ngFor="let item of filteredItems"
-                class="ng-select__item"
-                [class.ng-select__item--selected]="isMultiselect && item===hoveredItem"
-                [class.ng-select__item--selected]="!isMultiselect && (item.selected || item===hoveredItem)"
-                (click)="selectItem(item, $event)">
-                <!-- Elemento seleccionado -->
-                <i *ngIf="item.selected && isMultiselect"
-                   class="material-icons ng-select__icon">check_box</i>
-                <!-- Elemento NO seleccionado -->
-                <i *ngIf="!item.selected && isMultiselect"
-                   class="material-icons ng-select__icon">check_box_outline_blank</i>
-                <!-- Texto -->
-                <div class="ng-select__item-values">
-                    <span class="ng-select__item-value"
-                          [title]="item.value">
-                        {{item.value}}
-                    </span>
-                    <span *ngIf="item.valueSecondary"
-                          class="ng-select__item-value ng-select__item-value--secondary"
-                          [title]="item.valueSecondary">
-                        {{item.valueSecondary}}
-                    </span>
-                </div>
-            </li>
+            <!-- Multiselect: Registros filtrados -->
+            <ng-container *ngIf="isMultiselect">
+                <li *ngFor="let item of filteredItems"
+                    class="ng-select__item"
+                    [class.ng-select__item--hovered]="item===hoveredItem"
+                    (click)="selectItem(item, $event)">
+                    <!-- Elemento seleccionado -->
+                    <i *ngIf="item.selected"
+                       class="material-icons ng-select__icon">check_box</i>
+                    <!-- Elemento NO seleccionado -->
+                    <i *ngIf="!item.selected"
+                       class="material-icons ng-select__icon">check_box_outline_blank</i>
+                    <!-- Texto -->
+                    <div class="ng-select__item-values">
+                        <span class="ng-select__item-value"
+                              [title]="item.value">
+                            {{item.value}}
+                        </span>
+                        <span *ngIf="item.valueSecondary"
+                              class="ng-select__item-value ng-select__item-value--secondary"
+                              [title]="item.valueSecondary">
+                            {{item.valueSecondary}}
+                        </span>
+                    </div>
+                </li>
+            </ng-container>
+
+            <!-- Select: Registros filtrados -->
+            <ng-container *ngIf="!isMultiselect">
+
+                <li *ngFor="let item of filteredItems"
+                    class="ng-select__item"
+                    [class.ng-select__item--hovered]="item===hoveredItem && item!==selectedItem"
+                    [class.ng-select__item--selected]="item===selectedItem"
+                    (click)="selectItem(item, $event)">
+
+                    <!-- Texto -->
+                    <div class="ng-select__item-values">
+                        <span class="ng-select__item-value"
+                              [title]="item.value">
+                            {{item.value}}
+                        </span>
+                        <span *ngIf="item.valueSecondary"
+                              class="ng-select__item-value ng-select__item-value--secondary"
+                              [title]="item.valueSecondary">
+                            {{item.valueSecondary}}
+                        </span>
+                    </div>
+                </li>
+
+            </ng-container>
 
         </div>
 

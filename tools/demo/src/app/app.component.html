@@ -1,9 +1,19 @@
 <div class="select__container">
-    <ng-select [source]="rutasSource"
-                    [accentInsensitive]="true"
-                    [isMultiselect]="false"
-                    (selectedItemsChanged)="changes($event)"
-                    [toggleButtonText]="'Rutas'"></ng-select>
 
+    <!-- Control seleccionar elementos -->
+    <ng-select [source]="rutasSource"
+               [accentInsensitive]="true"
+               [isMultiselect]="isMultiselect"
+               [toggleButtonText]="'Rutas'"
+               [maxItemsVisible]="maxItemsVisible"
+               (selectedItemsChanged)="changes($event)"
+               (selectedItemChanged)="changeItem($event)">
+    </ng-select>
+
+    <button (click)="toggleMultiselect()">Toggle Multiselect</button>
+
+    <!-- Actualizar data source -->
     <button (click)="resetSource()">Actualizar origen de datos</button>
+
+    <button (click)="setMaxItems()">Máximo de registros visibles a 5</button>
 </div>

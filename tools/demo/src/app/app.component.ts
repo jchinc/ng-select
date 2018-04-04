@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { NgSelectItem } from '@jchinc/ng-select';
+import { NgSelectItem } from '@jchinc/ng-select/ng-select.models';
 import 'rxjs/add/operator/debounceTime';
 
 @Component({
@@ -9,9 +9,14 @@ import 'rxjs/add/operator/debounceTime';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
     title = 'app';
 
     rutasSource: Array<NgSelectItem> = [];
+
+    maxItemsVisible;
+
+    isMultiselect = false;
 
     constructor() {
         this.rutasSource.push(new NgSelectItem('1', 'Item 1', 'Pruebas'));
@@ -38,12 +43,24 @@ export class AppComponent {
         console.log(items);
     }
 
-    resetSource():void{
+    changeItem(item: NgSelectItem) {
+        console.log(item);
+    }
+
+    resetSource(): void {
         this.rutasSource = [];
         this.rutasSource.push(new NgSelectItem('1', 'Item 1', 'Pruebas'));
         this.rutasSource.push(new NgSelectItem('2', 'Item 2', '', false, ['prueba1', 'prueba2']));
         this.rutasSource.push(new NgSelectItem('3', 'Item 3 con texto largo para verificar ellipsis'));
         this.rutasSource.push(new NgSelectItem('4', 'Item 4'));
         this.rutasSource.push(new NgSelectItem('5', 'Item 5'));
+    }
+
+    setMaxItems(): void {
+        this.maxItemsVisible = 4;
+    }
+
+    toggleMultiselect() {
+        this.isMultiselect = !this.isMultiselect;
     }
 }
